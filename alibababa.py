@@ -51,11 +51,18 @@ supp=['']
 kw='666'
 respone = requests.get('http://www.baidu.com')
 
-
+print('''
+        -----------------------------------------------------
+        -----------------------------------------------------
+        -----欢迎使用Souring Robot For Bethany In Aliba------
+        ------------------Version 1.0------------------------
+        -----------------------------------------------------
+        -----------------------------------------------------
+''')
 while(kw != 'quit'):
     lit.clear()
     supp.clear()
-    kw=input('Notice:请输入需要检索的产品:\n')
+    kw=input('Notice:Bethany请输入需要检索的产品，输入quit退出:\n')
     find_web = 'https://www.alibaba.com/trade/search?fsb=y&IndexArea=company_en&CatId=&SearchText=%s' % kw
     stp=check_kw(kw)
     if stp==-1:
@@ -76,7 +83,7 @@ while(kw != 'quit'):
                 print('Notice:产品搜索已切换到%s'%kw)
                 break
             elif ch=='n':
-                print('Notice:主人选择仍然搜索%s\n'%kw)
+                print('Notice:主人选择仍然搜索%s'%kw)
                 print('Notice:那~现在开始抓数据了哦！\n')
                 break
             else:
