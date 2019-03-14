@@ -2,6 +2,7 @@ import requests
 import re
 import webbrowser
 import time
+import os
 #定义加权值
 
 #获取关键词并纠正关键词
@@ -11,6 +12,59 @@ import time
 #
 
 #
+
+def get_supp_dicts(res,name,href):
+    table = re.findall(r'class="company-basicInfo"\>(.*?)\<\/table\>',res.text, re.S)
+    title=[]
+    title_txt=[]
+    title = re.findall(r'class="field-title".*?\>(.*?)\<',str(table), re.S)
+    title_txt = re.findall(r'class="content-value".*?\>(.*?)\<',str(table), re.S)
+
+    title_dic = {'author': 'jorliang'}
+    title_dic.clear()
+    if len(title_txt)!=len(title):
+        markit=re.findall(r'class="market-item"\>(.*?)\<',str(table), re.S)
+        title_txt.insert(len(title_txt)-1,str(markit))
+    if len(title_txt)==len(title):
+        i = 0
+        j = len(title)
+        fp.write('Company Name:'+str(name) +'\tHome Page:'+str(href)+ '\t\n')
+        while i<j:
+            title_dic[title[i]]=title_txt[i]
+            i+=1
+        for dd in title_dic:
+            if dd.strip()!='' and dd.strip()!='-':
+                fp.write(dd+'<<<----->>>'+title_dic[dd]+'\t\n')
+        fp.write('-------------------cut line--------------------\t\n')
+        fp.flush()
+        #print(j)
+        # print(title)
+        # print(title_txt)
+        #print(title_dic)
+        title_dic.clear()
+    else:
+        print('Warning:主人发现不良数据~、\n')
+        print(title,len(title))
+        print(title_txt,len(title_txt))
+        title_dic.clear()
+
+
+def find_supp(res):
+    href=re.findall(r'h2 class="title ellipsis".*?href="(.*?)"',res.text,re.S)
+    name =re.findall(r'h2 class="title ellipsis".*?href=.*?\>(.*?)\<',res.text,re.S)
+    #print(href,len(href))
+    #webbrowser.open(res.url)
+    i=0
+    for ak in href:
+        subreq=requests.get(ak)
+        print('Notice:主人找到一家，正在爬取~')
+        #webbrowser.open(subreq.url)
+        get_supp_dicts(subreq,name[i],href[i])
+        i+=1
+        #ha.append())
+
+
+
 
 def check_kw(s):
     if re.findall(aa, kw).__len__() != 0:
@@ -49,7 +103,7 @@ aa = '[\u4e00-\u9fa5]'
 lit=['']
 supp=['']
 kw='666'
-respone = requests.get('http://www.baidu.com')
+#respone = requests.get('http://www.baidu.com')
 
 print('''
         -----------------------------------------------------
@@ -59,17 +113,19 @@ print('''
         -----------------------------------------------------
         -----------------------------------------------------
 ''')
+fp = open('tst.txt', 'w+', encoding='utf-8')
 while(kw != 'quit'):
     lit.clear()
     supp.clear()
-    kw=input('Notice:Bethany请输入需要检索的产品，输入quit退出:\n')
-    find_web = 'https://www.alibaba.com/trade/search?fsb=y&IndexArea=company_en&CatId=&SearchText=%s' % kw
+    kw=input('Notice:Bethany请输入需要检索的产品，输入quit退出:\n>>>')
+    find_web = 'https://www.alibaba.com/trade/search?fsb=y&IndexArea=company_en&CatId=&SearchText=%s&n=20' % kw
+    respone=requests.get(find_web)
     stp=check_kw(kw)
     if stp==-1:
         print('Error:主人输入不能包含汉字的！\n')
         continue
     elif stp == -2:
-        print('Error:主人你输入的是什么鬼，根本查不到！\n')
+        print('Error:主人你输入的是什么鬼，根本查不到！')
         continue
     elif stp == -3:
         print('Warning：主人检查到拼写错误了！你要找的商品是不是这个:%s'%str(lit[0][0]))
@@ -89,21 +145,22 @@ while(kw != 'quit'):
             else:
                 print('Warning:主人别乱输入！')
                 continue
-    elif stp==0:
-        print('Notice:供应商检索到%s个'%supp[0][0])
-        print('Notice:主人抓数据统计部分还么完成，现在仅支持检索功能！')
-    print('Notice:供应商检索到%s个' % supp[0][0])
-    print('五秒后就要打开浏览器了！')
-    print('5')
-    time.sleep(1)
-    print('4')
-    time.sleep(1)
-    print('3')
-    time.sleep(1)
-    print('2')
-    time.sleep(1)
-    print('1')
-    time.sleep(1)
-    webbrowser.open(find_web)
-
-
+    #elif stp==0:
+        #print('Notice:供应商检索到%s个'%supp[0][0])
+    print('Notice:主人抓数据统计分析部分还么完成，现在仅支持检索提取功能！')
+    #print('Notice:供应商检索到大约%s个' % supp[0][0])
+    # print('五秒后就要打开浏览器了！')
+    # print('5')
+    # time.sleep(1)
+    # print('4')
+    # time.sleep(1)
+    # print('3')
+    # time.sleep(1)
+    # print('2')
+    # time.sleep(1)
+    # print('1')
+    # time.sleep(1)
+    # webbrowser.open(find_web)
+    find_supp(respone)
+    fp.close()
+    os.startfile('tst.txt')
