@@ -3,6 +3,7 @@ import re
 import webbrowser
 import time
 import os
+import xlwt
 #定义加权值
 
 #获取关键词并纠正关键词
@@ -13,7 +14,7 @@ import os
 
 #
 
-def get_supp_dicts(res,name,href):
+def get_supp_dicts(res,name,href,r):
     table = re.findall(r'class="company-basicInfo"\>(.*?)\<\/table\>',res.text, re.S)
     title=[]
     title_txt=[]
@@ -28,15 +29,21 @@ def get_supp_dicts(res,name,href):
     if len(title_txt)==len(title):
         i = 0
         j = len(title)
-        fp.write('Company Name:'+str(name) +'\tHome Page:'+str(href)+ '\t\n')
+        # fp.write('Company Name:'+str(name) +'\tHome Page:'+str(href)+ '\t\n')
         while i<j:
             title_dic[title[i]]=title_txt[i]
             i+=1
+        c=0
+        worksheet.write(r, c, name)
+        worksheet.write(r, c + 1, href)
+        c=0
         for dd in title_dic:
             if dd.strip()!='' and dd.strip()!='-':
-                fp.write(dd+'<<<----->>>'+title_dic[dd]+'\t\n')
-        fp.write('-------------------cut line--------------------\t\n')
-        fp.flush()
+                worksheet.write(r, c+2, title_dic[dd])
+                c += 1
+        #         fp.write(dd+'<<<----->>>'+title_dic[dd]+'\t\n')
+        # fp.write('-------------------cut line--------------------\t\n')
+        # fp.flush()
         #print(j)
         # print(title)
         # print(title_txt)
@@ -49,9 +56,9 @@ def get_supp_dicts(res,name,href):
         title_dic.clear()
 
 
-def find_supp(res):
+def find_supp(res,r):
     href=re.findall(r'h2 class="title ellipsis".*?href="(.*?)"',res.text,re.S)
-    name =re.findall(r'h2 class="title ellipsis".*?href=.*?\>(.*?)\<',res.text,re.S)
+    name =re.findall(r'h2 class="title ellipsis".*?href=.*?\>(.*?)\&',res.text,re.S)
     #print(href,len(href))
     #webbrowser.open(res.url)
     i=0
@@ -59,8 +66,14 @@ def find_supp(res):
         subreq=requests.get(ak)
         print('Notice:主人找到一家，正在爬取~')
         #webbrowser.open(subreq.url)
-        get_supp_dicts(subreq,name[i],href[i])
+        c=0
+        for koo in hea:
+            worksheet.write(0, c, koo)
+            c+=1
+        get_supp_dicts(subreq,name[i],href[i],r)
         i+=1
+        r+=1
+
         #ha.append())
 
 
@@ -103,8 +116,8 @@ aa = '[\u4e00-\u9fa5]'
 lit=['']
 supp=['']
 kw='666'
+hea=['Company Name','Home Page','Business Type','Location','Main Products','Ownership','Total Employees','Total Annual Revenue','Year Established','Certifications','Product Certifications','Patents','Main Markets','Trademarks']
 #respone = requests.get('http://www.baidu.com')
-
 print('''
         -----------------------------------------------------
         -----------------------------------------------------
@@ -113,12 +126,16 @@ print('''
         -----------------------------------------------------
         -----------------------------------------------------
 ''')
-fp = open('tst.txt', 'w+', encoding='utf-8')
+#fp = open('tst.txt', 'w+', encoding='utf-8')
+workbook = xlwt.Workbook(encoding='ascii')
+worksheet = workbook.add_sheet('My Worksheet',cell_overwrite_ok=True)
+r=0
 while(kw != 'quit'):
+    r = 0
     lit.clear()
     supp.clear()
     kw=input('Notice:Bethany请输入需要检索的产品，输入quit退出:\n>>>')
-    find_web = 'https://www.alibaba.com/trade/search?fsb=y&IndexArea=company_en&CatId=&SearchText=%s&n=20&rd=1,2,3,4&f1=y&country=CN' % kw
+    find_web = 'https://www.alibaba.com/trade/search?fsb=y&IndexArea=company_en&CatId=&SearchText=%s&n=50&rd=1,2,3,4&f1=y&country=CN' % kw
     respone=requests.get(find_web)
     stp=check_kw(kw)
     if stp==-1:
@@ -147,8 +164,8 @@ while(kw != 'quit'):
                 continue
     #elif stp==0:
         #print('Notice:供应商检索到%s个'%supp[0][0])
-    print('Notice:主人抓数据统计分析部分还么完成，现在仅支持检索提取功能！')
-    print('Notice:供应商检索到大约%s个,先抓个20个' % supp[0][0])
+    print('Notice:主人抓数据统计分析部分还么完成，现在仅支持检索提取到Excel功能！')
+    print('Notice:供应商检索到大约%s个,计划先抓个50个' % supp[0][0])
     # print('五秒后就要打开浏览器了！')
     # print('5')
     # time.sleep(1)
@@ -161,6 +178,8 @@ while(kw != 'quit'):
     # print('1')
     # time.sleep(1)
     # webbrowser.open(find_web)
-    find_supp(respone)
-    fp.close()
-    os.startfile('tst.txt')
+    find_supp(respone,r)
+    # fp.close()
+    # os.startfile('tst.txt')
+    workbook.save('Excel_Workbook.xls')
+    os.startfile('Excel_Workbook.xls')
