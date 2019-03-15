@@ -115,9 +115,10 @@ print('''
 ''')
 fp = open('tst.txt', 'w+', encoding='utf-8')
 while(kw != 'quit'):
-    lit.clear()    supp.clear()
+    lit.clear()
+    supp.clear()
     kw=input('Notice:Bethany请输入需要检索的产品，输入quit退出:\n>>>')
-    find_web = 'https://www.alibaba.com/trade/search?fsb=y&IndexArea=company_en&CatId=&SearchText=%s&n=20' % kw
+    find_web = 'https://www.alibaba.com/trade/search?fsb=y&IndexArea=company_en&CatId=&SearchText=%s&n=20&rd=1,2,3,4&f1=y&country=CN' % kw
     respone=requests.get(find_web)
     stp=check_kw(kw)
     if stp==-1:
@@ -147,7 +148,7 @@ while(kw != 'quit'):
     #elif stp==0:
         #print('Notice:供应商检索到%s个'%supp[0][0])
     print('Notice:主人抓数据统计分析部分还么完成，现在仅支持检索提取功能！')
-    #print('Notice:供应商检索到大约%s个' % supp[0][0])
+    print('Notice:供应商检索到大约%s个,先抓个20个' % supp[0][0])
     # print('五秒后就要打开浏览器了！')
     # print('5')
     # time.sleep(1)
