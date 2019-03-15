@@ -115,8 +115,7 @@ print('''
 ''')
 fp = open('tst.txt', 'w+', encoding='utf-8')
 while(kw != 'quit'):
-    lit.clear()
-    supp.clear()
+    lit.clear()    supp.clear()
     kw=input('Notice:Bethany请输入需要检索的产品，输入quit退出:\n>>>')
     find_web = 'https://www.alibaba.com/trade/search?fsb=y&IndexArea=company_en&CatId=&SearchText=%s&n=20' % kw
     respone=requests.get(find_web)
